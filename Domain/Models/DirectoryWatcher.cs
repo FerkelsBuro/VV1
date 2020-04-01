@@ -1,4 +1,6 @@
-﻿using Infrastructure;
+﻿using Core.Extensions;
+using Infrastructure;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -10,7 +12,7 @@ namespace Domain.Models
     {
         private readonly string verzeichnis;
         private readonly DateiLeser dateiLeser;
-        private List<WatchedFile> files = new List<WatchedFile>();
+        private IEnumerable<WatchedFile> files = new List<WatchedFile>();
 
         public DirectoryWatcher(string verzeichnis, DateiLeser dateiLeser = null)
         {
@@ -20,40 +22,47 @@ namespace Domain.Models
 
         public void Watch()
         {
-            files = dateiLeser.ReadFiles(verzeichnis)
-                .Select(f => new WatchedFile(Path.GetFileName(f), verzeichnis, dateiLeser.GetFileTime(f), Dateizustande.CREATED))
-                .ToList();
-
-            while(true)
+            while (true)
             {
-                List<WatchedFile> newFiles = dateiLeser.ReadFiles(verzeichnis)
-                    .Select(f => new WatchedFile(Path.GetFileName(f), verzeichnis, dateiLeser.GetFileTime(f), Dateizustande.CREATED))
-                    .ToList();
-            
-                foreach (WatchedFile newFile in newFiles)
-                {
-                    var Event = CheckFile(newFile);
+                var newFiles = GetDirectoryFiles();
 
-                    Trace.TraceInformation(Event.DateiName + " " + Event.Event);
-                }
+                // Datei erstellt
+                LogEvent(() => GetCreatedFiles(newFiles), Alphabet.CREATE);
+                // Datei geupdated
+                LogEvent(() => GetUpdatedFiles(newFiles), Alphabet.MODIFY);
+                // Datei gelöscht
+                LogEvent(() => GetDeletedFiles(newFiles), Alphabet.DELETE);
 
                 files = newFiles;
             }
         }
 
-        private FileEvent CheckFile(WatchedFile file)
+        private void LogEvent(Func<IEnumerable<WatchedFile>> algorithmus, Alphabet alphabet)
         {
-            var searchedFile = files.Find(f => f.DateiName == file.DateiName);
-            if (searchedFile == null)
-            {
-                return new FileEvent(file.DateiName, Alphabet.CREATE);
-            }
-            else if(files.Find(f => f.DateiName == file.DateiName && f.ZeitStempel == file.ZeitStempel) == null)
-            {
-                return new FileEvent(file.DateiName, Alphabet.MODIFY);
-            }
+            algorithmus()
+                .Select(f => new FileEvent(f.DateiName, alphabet))
+                .ForEach(evt => Trace.TraceInformation(evt.DateiName + " " + evt.Event));
+        }
 
-            return new FileEvent(file.DateiName, Alphabet.SYNC);
+        private IEnumerable<WatchedFile> GetDeletedFiles(IEnumerable<WatchedFile> newFiles)
+        {
+            return files.Except(newFiles);
+        }
+
+        private IEnumerable<WatchedFile> GetUpdatedFiles(IEnumerable<WatchedFile> newFiles)
+        {
+            return newFiles.Where(change => files.Any(f => f.HasSamePath(change) && f.ZeitStempel != change.ZeitStempel));
+        }
+
+        private IEnumerable<WatchedFile> GetCreatedFiles(IEnumerable<WatchedFile> newFiles)
+        {
+            return newFiles.Except(files);
+        }
+
+        private IEnumerable<WatchedFile> GetDirectoryFiles()
+        {
+            return dateiLeser.ReadFiles(verzeichnis)
+                .Select(f => new WatchedFile(Path.GetFileName(f), verzeichnis, dateiLeser.GetFileTime(f), Dateizustande.CREATED));
         }
     }
 }

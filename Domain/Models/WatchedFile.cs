@@ -18,5 +18,15 @@ namespace Domain.Models
         public string Verzeichnis { get; set; }
         public DateTime ZeitStempel { get; set; }
         public Dateizustande Zustand { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            var file = obj as WatchedFile;
+            return file != null &&
+                   DateiName == file.DateiName &&
+                   Verzeichnis == file.Verzeichnis &&
+                   ZeitStempel == file.ZeitStempel &&
+                   Zustand == file.Zustand;
+        }
     }
 }

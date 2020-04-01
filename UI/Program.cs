@@ -3,13 +3,11 @@ using System;
 
 namespace UI
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
-
-            var watcher = new DirectoryWatcher(@"C:\Users\ITB\source\repos\VV1");
+            var watcher = new DirectoryWatcher(Environment.CurrentDirectory);
             watcher.Watch();
         }
     }

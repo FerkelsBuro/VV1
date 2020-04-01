@@ -1,8 +1,6 @@
 ﻿using Infrastructure;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Domain.Models
 {
@@ -12,7 +10,7 @@ namespace Domain.Models
         private readonly DateiLeser dateiLeser;
         private List<WatchedFile> files = new List<WatchedFile>();
 
-        public DirectoryWatcher(string verzeichnis = "", DateiLeser dateiLeser = null)
+        public DirectoryWatcher(string verzeichnis, DateiLeser dateiLeser = null)
         {
             this.verzeichnis = verzeichnis;
             this.dateiLeser = dateiLeser ?? new DateiLeser();

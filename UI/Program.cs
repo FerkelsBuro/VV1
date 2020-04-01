@@ -1,5 +1,6 @@
 ﻿using Domain.Models;
 using System;
+using System.Diagnostics;
 
 namespace UI
 {
@@ -7,8 +8,15 @@ namespace UI
     {
         private static void Main(string[] args)
         {
+            AddLogger();
             var watcher = new DirectoryWatcher(Environment.CurrentDirectory);
             watcher.Watch();
+        }
+
+        private static void AddLogger()
+        {
+            Trace.Listeners.Add(new TextWriterTraceListener("file.log"));
+            Trace.AutoFlush = true;
         }
     }
 }

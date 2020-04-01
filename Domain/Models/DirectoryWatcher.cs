@@ -34,7 +34,7 @@ namespace Domain.Models
                 {
                     var Event = CheckFile(newFile);
 
-                    Debug.WriteLine(Event.DateiName + " " + Event.Event);
+                    Trace.TraceInformation(Event.DateiName + " " + Event.Event);
                 }
 
                 files = newFiles;

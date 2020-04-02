@@ -26,12 +26,13 @@ namespace Domain.Models
             {
                 var newFiles = GetDirectoryFiles();
 
+                var watchedFiles = new WatchedFiles(files);
                 // Datei erstellt
-                LogEvent(() => GetCreatedFiles(newFiles), Alphabet.CREATE);
+                LogEvent(() => watchedFiles.GetCreatedFiles(newFiles), Alphabet.CREATE);
                 // Datei geupdated
-                LogEvent(() => GetUpdatedFiles(newFiles), Alphabet.MODIFY);
+                LogEvent(() => watchedFiles.GetUpdatedFiles(newFiles), Alphabet.MODIFY);
                 // Datei gelöscht
-                LogEvent(() => GetDeletedFiles(newFiles), Alphabet.DELETE);
+                LogEvent(() => watchedFiles.GetDeletedFiles(newFiles), Alphabet.DELETE);
 
                 files = newFiles;
             }
@@ -42,21 +43,6 @@ namespace Domain.Models
             algorithmus()
                 .Select(f => new FileEvent(f.DateiName, alphabet))
                 .ForEach(evt => Trace.TraceInformation(evt.DateiName + " " + evt.Event));
-        }
-
-        private IEnumerable<WatchedFile> GetDeletedFiles(IEnumerable<WatchedFile> newFiles)
-        {
-            return files.Except(newFiles);
-        }
-
-        private IEnumerable<WatchedFile> GetUpdatedFiles(IEnumerable<WatchedFile> newFiles)
-        {
-            return newFiles.Where(change => files.Any(f => f.HasSamePath(change) && f.ZeitStempel != change.ZeitStempel));
-        }
-
-        private IEnumerable<WatchedFile> GetCreatedFiles(IEnumerable<WatchedFile> newFiles)
-        {
-            return newFiles.Except(files);
         }
 
         private IEnumerable<WatchedFile> GetDirectoryFiles()

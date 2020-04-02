@@ -24,7 +24,16 @@ namespace Domain.Models
         {
             while (true)
             {
-                var newFiles = GetDirectoryFiles();
+                var newFiles = Enumerable.Empty<WatchedFile>();
+
+                try
+                {
+                    newFiles = GetDirectoryFiles();
+                }
+                catch (Exception e)
+                {
+                    Trace.TraceError("Fehler {0}, {1}, {2}", DateTime.Now, e.Message, e.StackTrace);
+                }
 
                 var watchedFiles = new WatchedFiles(files);
                 // Datei erstellt

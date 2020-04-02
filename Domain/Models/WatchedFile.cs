@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Domain.Models
 {
-    public class WatchedFile: IEqualityComparer<WatchedFile>
+    public class WatchedFile : IEqualityComparer<WatchedFile>
     {
         public WatchedFile(string dateiName, string verzeichnis, DateTime zeitStempel, Dateizustande zustand)
         {
@@ -23,22 +22,19 @@ namespace Domain.Models
         {
             if (x == y) return true;
             if (x == null || y == null) return false;
-            return x.HasSamePath(y);
+            return x.Equals(y);
         }
 
         public override bool Equals(object obj)
         {
             var file = obj as WatchedFile;
             return file != null &&
-                   DateiName == file.DateiName &&
-                   Verzeichnis == file.Verzeichnis &&
-                   ZeitStempel == file.ZeitStempel &&
-                   Zustand == file.Zustand;
+                   HasSamePath(file);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(DateiName, Verzeichnis, ZeitStempel, Zustand);
+            return HashCode.Combine(DateiName, Verzeichnis);
         }
 
         public int GetHashCode(WatchedFile obj)

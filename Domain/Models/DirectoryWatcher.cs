@@ -48,7 +48,8 @@ namespace Domain.Models
         private IEnumerable<WatchedFile> GetDirectoryFiles()
         {
             return dateiLeser.ReadFiles(verzeichnis)
-                .Select(f => new WatchedFile(Path.GetFileName(f), verzeichnis, dateiLeser.GetFileTime(f), Dateizustande.CREATED));
+                .Select(f => new WatchedFile(Path.GetFileName(f), verzeichnis, dateiLeser.GetFileTime(f), Dateizustande.CREATED))
+                .ToList();
         }
     }
 }

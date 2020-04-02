@@ -1,4 +1,5 @@
 ﻿using Core.Extensions;
+using Domain.Models;
 using Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
-namespace Domain.Models
+namespace Domain.Services
 {
     public class DirectoryWatcher
     {

@@ -1,5 +1,8 @@
 ﻿using Domain.Models;
+using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
 namespace Domain.Services
 {
@@ -53,13 +56,28 @@ namespace Domain.Services
             };
         }
 
-        public Dictionary<string, WatchedFile> watchedFiles { get; set; }
+        public Dictionary<string, WatchedFile> WatchedFiles { get; set; }
 
         public void Update(FileEvent ev)
         {
-            if (!watchedFiles.TryGetValue(ev.DateiName, out var file)) return;
+            if (!WatchedFiles.TryGetValue(ev.DateiName, out var file)) return;
 
             file.Zustand = _stateDictionary[file.Zustand][ev.Event];
+        }
+
+        public void Sync(Stream stream)
+        {
+            var message = JsonConvert.SerializeObject(WatchedFiles);
+
+            var streamWrite = new StreamWriter(stream, new UnicodeEncoding());
+            streamWrite.Write(message);
+            streamWrite.Flush();
+            stream.Seek(0, SeekOrigin.Begin);
+
+            foreach (var file in WatchedFiles.Values)
+            {
+                Update(new FileEvent(file.DateiName, Alphabet.SYNC));
+            }
         }
     }
 }

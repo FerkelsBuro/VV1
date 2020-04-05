@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Domain.Models
+﻿namespace Domain.Models
 {
-    class FileEvent
+    public class FileEvent
     {
         public FileEvent(string dateiName, Alphabet @event)
         {

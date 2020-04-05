@@ -1,6 +1,7 @@
 ﻿using Domain.Services;
 using System;
 using System.Diagnostics;
+using System.IO;
 
 namespace UI
 {
@@ -15,7 +16,8 @@ namespace UI
 
         private static void AddLogger()
         {
-            Trace.Listeners.Add(new TextWriterTraceListener("file.log"));
+            Directory.CreateDirectory("log");
+            Trace.Listeners.Add(new TextWriterTraceListener(@"log\file.log"));
             Trace.AutoFlush = true;
         }
     }

@@ -5,32 +5,61 @@ namespace Domain.Services
 {
     public class WatchedDirectory
     {
+        private static readonly Dictionary<Dateizustande, Dictionary<Alphabet, Dateizustande>> _stateDictionary;
+
+        static WatchedDirectory()
+        {
+            _stateDictionary = new Dictionary<Dateizustande, Dictionary<Alphabet, Dateizustande>>
+            {
+                [Dateizustande.CREATED] = new Dictionary<Alphabet, Dateizustande>
+                {
+                    [Alphabet.CREATE] = Dateizustande.CREATED,
+                    [Alphabet.DELETE] = Dateizustande.GONE,
+                    [Alphabet.MODIFY] = Dateizustande.CREATED,
+                    [Alphabet.SYNC] = Dateizustande.INSYNC,
+                },
+
+                [Dateizustande.DELETED] = new Dictionary<Alphabet, Dateizustande>
+                {
+                    [Alphabet.CREATE] = Dateizustande.MODIFIED,
+                    [Alphabet.DELETE] = Dateizustande.DELETED,
+                    [Alphabet.MODIFY] = Dateizustande.MODIFIED,
+                    [Alphabet.SYNC] = Dateizustande.GONE,
+                },
+
+                [Dateizustande.GONE] = new Dictionary<Alphabet, Dateizustande>
+                {
+                    [Alphabet.CREATE] = Dateizustande.CREATED,
+                    [Alphabet.DELETE] = Dateizustande.GONE,
+                    [Alphabet.MODIFY] = Dateizustande.GONE,
+                    [Alphabet.SYNC] = Dateizustande.GONE,
+                },
+
+                [Dateizustande.INSYNC] = new Dictionary<Alphabet, Dateizustande>
+                {
+                    [Alphabet.CREATE] = Dateizustande.MODIFIED,
+                    [Alphabet.DELETE] = Dateizustande.DELETED,
+                    [Alphabet.MODIFY] = Dateizustande.MODIFIED,
+                    [Alphabet.SYNC] = Dateizustande.INSYNC,
+                },
+
+                [Dateizustande.MODIFIED] = new Dictionary<Alphabet, Dateizustande>
+                {
+                    [Alphabet.CREATE] = Dateizustande.MODIFIED,
+                    [Alphabet.DELETE] = Dateizustande.DELETED,
+                    [Alphabet.MODIFY] = Dateizustande.MODIFIED,
+                    [Alphabet.SYNC] = Dateizustande.INSYNC,
+                },
+            };
+        }
+
         public Dictionary<string, WatchedFile> watchedFiles { get; set; }
 
         public void Update(FileEvent ev)
         {
             if (!watchedFiles.TryGetValue(ev.DateiName, out var file)) return;
 
-            switch (file.Zustand)
-            {
-                case Dateizustande.CREATED:
-                    switch (ev.Event)
-                    {
-                        case Alphabet.CREATE:
-                        case Alphabet.MODIFY:
-                            file.Zustand = Dateizustande.CREATED;
-                            break;
-
-                        case Alphabet.DELETE:
-                            file.Zustand = Dateizustande.GONE;
-                            break;
-
-                        case Alphabet.SYNC:
-                            file.Zustand = Dateizustande.INSYNC;
-                            break;
-                    }
-                    break;
-            }
+            file.Zustand = _stateDictionary[file.Zustand][ev.Event];
         }
     }
 }

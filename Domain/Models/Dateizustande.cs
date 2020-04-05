@@ -4,7 +4,7 @@
     {
         INSYNC,
         CREATED,
-        MODIEFIED,
+        MODIFIED,
         DELETED,
         GONE
     }

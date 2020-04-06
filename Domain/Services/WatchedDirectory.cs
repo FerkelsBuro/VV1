@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace Domain.Services
@@ -76,14 +77,13 @@ namespace Domain.Services
 
         public void Sync(Stream stream)
         {
-            var message = JsonConvert.SerializeObject(WatchedFiles);
+            var message = JsonConvert.SerializeObject(WatchedFiles.ToList(), Formatting.Indented);
 
             var streamWrite = new StreamWriter(stream, new UnicodeEncoding());
             streamWrite.Write(message);
             streamWrite.Flush();
-            stream.Seek(0, SeekOrigin.Begin);
 
-            foreach (var file in WatchedFiles.Values)
+            foreach (var file in WatchedFiles.Values.ToList())
             {
                 Update(new FileEvent(file, Alphabet.SYNC));
             }

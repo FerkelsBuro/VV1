@@ -11,22 +11,25 @@ namespace UI
     internal class Program
     {
         private const int PollingIntervallInMilliseconds = 1000;
+        private const int SyncIntervall = 400;
 
         private static void Main(string[] args)
         {
             AddLogger();
 
             var queue = new BlockingCollection<FileEvent>();
-            Task.Run(() => ExecuteDirectoryWatcher(queue));
-            Task.Run(() => ExecuteWatchedDirectory(queue));
+            var watchedDirectory = new WatchedDirectory();
 
+            Task.Run(() => ExecuteDirectoryWatcher(queue));
+            Task.Run(() => ExecuteWatchedDirectory(watchedDirectory, queue));
+            Task.Run(() => ExecuteSync(watchedDirectory, Console.OpenStandardOutput()));
+
+            Task.Delay(1000 * 60 * 60 * 24).Wait();
             Console.ReadLine();
         }
 
-        private static async Task ExecuteWatchedDirectory(BlockingCollection<FileEvent> queue)
+        private static async Task ExecuteWatchedDirectory(WatchedDirectory watchedDirectory, BlockingCollection<FileEvent> queue)
         {
-            var watchedDirectory = new WatchedDirectory();
-
             while (true)
             {
                 if (queue.TryTake(out var fileEvent))
@@ -35,6 +38,15 @@ namespace UI
                 }
 
                 await Task.Delay(PollingIntervallInMilliseconds);
+            }
+        }
+
+        private static async Task ExecuteSync(WatchedDirectory watchedDirectory, Stream stream)
+        {
+            while (true)
+            {
+                await Task.Delay(SyncIntervall);
+                watchedDirectory.Sync(stream);
             }
         }
 

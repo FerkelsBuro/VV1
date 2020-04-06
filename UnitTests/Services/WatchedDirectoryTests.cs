@@ -73,7 +73,7 @@ namespace UnitTests.Services
             var file = GetFile("datei1", initialState);
             _sut.WatchedFiles = GetDictionary(file);
 
-            var updateEvent = new FileEvent(file.DateiName, input);
+            var updateEvent = new FileEvent(file, input);
             _sut.Update(updateEvent);
 
             Assert.Equal(resultState, file.Zustand);

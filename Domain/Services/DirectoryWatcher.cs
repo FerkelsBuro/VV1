@@ -13,18 +13,16 @@ namespace Domain.Services
     public class DirectoryWatcher
     {
         private readonly Action<FileEvent> _strategy;
-        private readonly string _verzeichnis;
-        private readonly DateiLeser _dateiLeser;
+        private readonly IDateiLeser _dateiLeser;
         private IEnumerable<WatchedFile> _files = new List<WatchedFile>();
 
-        public DirectoryWatcher(Action<FileEvent> strategy, string verzeichnis, DateiLeser dateiLeser = null)
+        public DirectoryWatcher(Action<FileEvent> strategy, IDateiLeser dateiLeser)
         {
             _strategy = strategy;
-            this._verzeichnis = verzeichnis;
-            this._dateiLeser = dateiLeser ?? new DateiLeser();
+            this._dateiLeser = dateiLeser;
         }
 
-        public async Task Watch(int pollingIntervallInMilliseconds)
+        public async Task Watch(string verzeichnis, int pollingIntervallInMilliseconds)
         {
             while (true)
             {
@@ -32,7 +30,7 @@ namespace Domain.Services
 
                 try
                 {
-                    newFiles = GetDirectoryFiles();
+                    newFiles = GetDirectoryFiles(verzeichnis);
                 }
                 catch (Exception e)
                 {
@@ -63,10 +61,10 @@ namespace Domain.Services
                 });
         }
 
-        private IEnumerable<WatchedFile> GetDirectoryFiles()
+        private IEnumerable<WatchedFile> GetDirectoryFiles(string verzeichnis)
         {
-            return _dateiLeser.ReadFiles(_verzeichnis)
-                .Select(f => new WatchedFile(Path.GetFileName(f), _verzeichnis, _dateiLeser.GetFileTime(f), Dateizustande.CREATED))
+            return _dateiLeser.ReadFiles(verzeichnis)
+                .Select(f => new WatchedFile(Path.GetFileName(f), verzeichnis, _dateiLeser.GetFileTime(f), Dateizustande.CREATED))
                 .ToList();
         }
     }

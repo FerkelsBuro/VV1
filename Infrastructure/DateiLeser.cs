@@ -4,7 +4,14 @@ using System.IO;
 
 namespace Infrastructure
 {
-    public class DateiLeser
+    public interface IDateiLeser
+    {
+        DateTime GetFileTime(string file);
+
+        IEnumerable<string> ReadFiles(string directory);
+    }
+
+    public class DateiLeser : IDateiLeser
     {
         public IEnumerable<string> ReadFiles(string directory)
         {

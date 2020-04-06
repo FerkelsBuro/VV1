@@ -1,5 +1,6 @@
 ﻿using Domain.Models;
 using Domain.Services;
+using Infrastructure;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -59,8 +60,8 @@ namespace UI
                 queue.Add(fileEvent);
             };
 
-            var directoryWatcher = new DirectoryWatcher(strategy, Environment.CurrentDirectory);
-            await directoryWatcher.Watch(PollingIntervallInMilliseconds);
+            var directoryWatcher = new DirectoryWatcher(strategy, new DateiLeser());
+            await directoryWatcher.Watch(Environment.CurrentDirectory, PollingIntervallInMilliseconds);
         }
 
         private static void AddLogger()

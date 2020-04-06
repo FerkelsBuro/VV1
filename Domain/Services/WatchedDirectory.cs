@@ -60,12 +60,18 @@ namespace Domain.Services
 
         public Dictionary<string, WatchedFile> WatchedFiles { get; set; } = new Dictionary<string, WatchedFile>();
 
-        public void Update(FileEvent ev)
+        public void Update(FileEvent evt)
         {
-            if (!WatchedFiles.TryGetValue(ev.DateiName, out var file)) return;
+            if (!WatchedFiles.ContainsKey(evt.WatchedFile.DateiName))
+            {
+                WatchedFiles.Add(evt.WatchedFile.DateiName, evt.WatchedFile);
+                return;
+            }
+
+            var file = evt.WatchedFile;
 
             Trace.TraceInformation("Klasse {0}, Zeit {1}", nameof(WatchedDirectory), DateTime.Now);
-            file.Zustand = _stateDictionary[file.Zustand][ev.Event];
+            file.Zustand = _stateDictionary[file.Zustand][evt.Event];
         }
 
         public void Sync(Stream stream)
@@ -79,7 +85,7 @@ namespace Domain.Services
 
             foreach (var file in WatchedFiles.Values)
             {
-                Update(new FileEvent(file.DateiName, Alphabet.SYNC));
+                Update(new FileEvent(file, Alphabet.SYNC));
             }
         }
     }

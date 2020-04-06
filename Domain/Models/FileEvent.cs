@@ -2,13 +2,13 @@
 {
     public class FileEvent
     {
-        public FileEvent(string dateiName, Alphabet @event)
+        public FileEvent(WatchedFile watchedFile, Alphabet @event)
         {
-            DateiName = dateiName;
+            WatchedFile = watchedFile;
             Event = @event;
         }
 
-        public string DateiName { get; set; }
+        public WatchedFile WatchedFile { get; set; }
         public Alphabet Event { get; set; }
     }
 }

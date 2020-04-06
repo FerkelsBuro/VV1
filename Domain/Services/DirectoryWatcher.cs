@@ -53,7 +53,7 @@ namespace Domain.Services
         private void ExecuteStrategy(Func<IEnumerable<WatchedFile>> algorithmus, Alphabet alphabet)
         {
             algorithmus()
-                .Select(f => new FileEvent(f.DateiName, alphabet))
+                .Select(f => new FileEvent(f, alphabet))
                 .ForEach(evt =>
                 {
                     _strategy(evt);

@@ -39,7 +39,7 @@ namespace UI
             Action<FileEvent> strategy = (fileEvent) =>
             {
                 Trace.TraceInformation("Klasse {0}, Zeit {1}", nameof(DirectoryWatcher), DateTime.Now);
-                Trace.TraceInformation(fileEvent.DateiName + " " + fileEvent.Event);
+                Trace.TraceInformation(fileEvent.WatchedFile + " " + fileEvent.Event);
                 queue.Add(fileEvent);
             };
 

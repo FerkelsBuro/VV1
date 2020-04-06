@@ -1,7 +1,7 @@
 ﻿using Domain.Models;
 using Domain.Services;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 
@@ -13,11 +13,11 @@ namespace UI
         {
             AddLogger();
 
-            var queue = new Queue<FileEvent>();
+            var queue = new BlockingCollection<FileEvent>();
             Action<FileEvent> strategy = (fileEvent) =>
             {
                 Trace.TraceInformation(fileEvent.DateiName + " " + fileEvent.Event);
-                queue.Enqueue(fileEvent);
+                queue.Add(fileEvent);
             };
 
             var directoryWatcher = new DirectoryWatcher(strategy, Environment.CurrentDirectory);
@@ -27,7 +27,7 @@ namespace UI
 
             while (true)
             {
-                if (queue.TryDequeue(out var fileEvent))
+                if (queue.TryTake(out var fileEvent))
                 {
                     watchedDirectory.Update(fileEvent);
                 }

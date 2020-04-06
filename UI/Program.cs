@@ -12,7 +12,7 @@ namespace UI
     internal class Program
     {
         private const int PollingIntervallInMilliseconds = 1000;
-        private const int SyncIntervall = 400;
+        private const int SyncIntervall = 10000;
 
         private static void Main(string[] args)
         {

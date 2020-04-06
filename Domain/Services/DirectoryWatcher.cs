@@ -40,23 +40,22 @@ namespace Domain.Services
 
                 var watchedFiles = new WatchedFiles(_files);
                 // Datei erstellt
-                LogEvent(() => watchedFiles.GetCreatedFiles(newFiles), Alphabet.CREATE);
+                ExecuteStrategy(() => watchedFiles.GetCreatedFiles(newFiles), Alphabet.CREATE);
                 // Datei geupdated
-                LogEvent(() => watchedFiles.GetUpdatedFiles(newFiles), Alphabet.MODIFY);
+                ExecuteStrategy(() => watchedFiles.GetUpdatedFiles(newFiles), Alphabet.MODIFY);
                 // Datei gelöscht
-                LogEvent(() => watchedFiles.GetDeletedFiles(newFiles), Alphabet.DELETE);
+                ExecuteStrategy(() => watchedFiles.GetDeletedFiles(newFiles), Alphabet.DELETE);
 
                 _files = newFiles;
             }
         }
 
-        private void LogEvent(Func<IEnumerable<WatchedFile>> algorithmus, Alphabet alphabet)
+        private void ExecuteStrategy(Func<IEnumerable<WatchedFile>> algorithmus, Alphabet alphabet)
         {
             algorithmus()
                 .Select(f => new FileEvent(f.DateiName, alphabet))
                 .ForEach(evt =>
                 {
-                    Trace.TraceInformation(evt.DateiName + " " + evt.Event);
                     _strategy(evt);
                 });
         }

@@ -11,10 +11,16 @@ namespace UI
     {
         private static void Main(string[] args)
         {
-            var queue = new Queue<FileEvent>();
-
             AddLogger();
-            var directoryWatcher = new DirectoryWatcher((fileEvent) => queue.Enqueue(fileEvent), Environment.CurrentDirectory);
+
+            var queue = new Queue<FileEvent>();
+            Action<FileEvent> strategy = (fileEvent) =>
+            {
+                Trace.TraceInformation(fileEvent.DateiName + " " + fileEvent.Event);
+                queue.Enqueue(fileEvent);
+            };
+
+            var directoryWatcher = new DirectoryWatcher(strategy, Environment.CurrentDirectory);
             directoryWatcher.Watch();
 
             var watchedDirectory = new WatchedDirectory();

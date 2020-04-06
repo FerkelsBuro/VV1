@@ -14,7 +14,7 @@ namespace UI
             var queue = new Queue<FileEvent>();
 
             AddLogger();
-            var directoryWatcher = new DirectoryWatcher(queue, Environment.CurrentDirectory);
+            var directoryWatcher = new DirectoryWatcher((fileEvent) => queue.Enqueue(fileEvent), Environment.CurrentDirectory);
             directoryWatcher.Watch();
 
             var watchedDirectory = new WatchedDirectory();

@@ -11,14 +11,14 @@ namespace Domain.Services
 {
     public class DirectoryWatcher
     {
-        private readonly Queue<FileEvent> _fileEvents;
+        private readonly Action<FileEvent> _strategy;
         private readonly string _verzeichnis;
         private readonly DateiLeser _dateiLeser;
         private IEnumerable<WatchedFile> _files = new List<WatchedFile>();
 
-        public DirectoryWatcher(Queue<FileEvent> fileEvents, string verzeichnis, DateiLeser dateiLeser = null)
+        public DirectoryWatcher(Action<FileEvent> strategy, string verzeichnis, DateiLeser dateiLeser = null)
         {
-            _fileEvents = fileEvents;
+            _strategy = strategy;
             this._verzeichnis = verzeichnis;
             this._dateiLeser = dateiLeser ?? new DateiLeser();
         }
@@ -57,7 +57,7 @@ namespace Domain.Services
                 .ForEach(evt =>
                 {
                     Trace.TraceInformation(evt.DateiName + " " + evt.Event);
-                    _fileEvents.Enqueue(evt);
+                    _strategy(evt);
                 });
         }
 

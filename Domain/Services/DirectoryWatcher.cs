@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Domain.Services
 {
@@ -23,7 +24,7 @@ namespace Domain.Services
             this._dateiLeser = dateiLeser ?? new DateiLeser();
         }
 
-        public void Watch()
+        public async Task Watch(int pollingIntervallInMilliseconds)
         {
             while (true)
             {
@@ -47,6 +48,8 @@ namespace Domain.Services
                 ExecuteStrategy(() => watchedFiles.GetDeletedFiles(newFiles), Alphabet.DELETE);
 
                 _files = newFiles;
+
+                await Task.Delay(pollingIntervallInMilliseconds);
             }
         }
 

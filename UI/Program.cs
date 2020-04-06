@@ -10,6 +10,8 @@ namespace UI
 {
     internal class Program
     {
+        private const int PollingIntervallInMilliseconds = 1000;
+
         private static void Main(string[] args)
         {
             AddLogger();
@@ -21,7 +23,7 @@ namespace UI
             Console.ReadLine();
         }
 
-        private static void ExecuteWatchedDirectory(BlockingCollection<FileEvent> queue)
+        private static async Task ExecuteWatchedDirectory(BlockingCollection<FileEvent> queue)
         {
             var watchedDirectory = new WatchedDirectory();
 
@@ -31,10 +33,12 @@ namespace UI
                 {
                     watchedDirectory.Update(fileEvent);
                 }
+
+                await Task.Delay(PollingIntervallInMilliseconds);
             }
         }
 
-        private static void ExecuteDirectoryWatcher(BlockingCollection<FileEvent> queue)
+        private static async Task ExecuteDirectoryWatcher(BlockingCollection<FileEvent> queue)
         {
             Action<FileEvent> strategy = (fileEvent) =>
             {
@@ -44,7 +48,7 @@ namespace UI
             };
 
             var directoryWatcher = new DirectoryWatcher(strategy, Environment.CurrentDirectory);
-            directoryWatcher.Watch();
+            await directoryWatcher.Watch(PollingIntervallInMilliseconds);
         }
 
         private static void AddLogger()

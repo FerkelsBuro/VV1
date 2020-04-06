@@ -1,6 +1,8 @@
 ﻿using Domain.Models;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -56,12 +58,13 @@ namespace Domain.Services
             };
         }
 
-        public Dictionary<string, WatchedFile> WatchedFiles { get; set; }
+        public Dictionary<string, WatchedFile> WatchedFiles { get; set; } = new Dictionary<string, WatchedFile>();
 
         public void Update(FileEvent ev)
         {
             if (!WatchedFiles.TryGetValue(ev.DateiName, out var file)) return;
 
+            Trace.TraceInformation("Klasse {0}, Zeit {1}", nameof(WatchedDirectory), DateTime.Now);
             file.Zustand = _stateDictionary[file.Zustand][ev.Event];
         }
 

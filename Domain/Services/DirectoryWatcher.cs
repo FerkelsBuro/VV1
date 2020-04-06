@@ -11,14 +11,16 @@ namespace Domain.Services
 {
     public class DirectoryWatcher
     {
-        private readonly string verzeichnis;
-        private readonly DateiLeser dateiLeser;
-        private IEnumerable<WatchedFile> files = new List<WatchedFile>();
+        private readonly Queue<FileEvent> _fileEvents;
+        private readonly string _verzeichnis;
+        private readonly DateiLeser _dateiLeser;
+        private IEnumerable<WatchedFile> _files = new List<WatchedFile>();
 
-        public DirectoryWatcher(string verzeichnis, DateiLeser dateiLeser = null)
+        public DirectoryWatcher(Queue<FileEvent> fileEvents, string verzeichnis, DateiLeser dateiLeser = null)
         {
-            this.verzeichnis = verzeichnis;
-            this.dateiLeser = dateiLeser ?? new DateiLeser();
+            _fileEvents = fileEvents;
+            this._verzeichnis = verzeichnis;
+            this._dateiLeser = dateiLeser ?? new DateiLeser();
         }
 
         public void Watch()
@@ -36,7 +38,7 @@ namespace Domain.Services
                     Trace.TraceError("Fehler {0}, {1}, {2}", DateTime.Now, e.Message, e.StackTrace);
                 }
 
-                var watchedFiles = new WatchedFiles(files);
+                var watchedFiles = new WatchedFiles(_files);
                 // Datei erstellt
                 LogEvent(() => watchedFiles.GetCreatedFiles(newFiles), Alphabet.CREATE);
                 // Datei geupdated
@@ -44,7 +46,7 @@ namespace Domain.Services
                 // Datei gelöscht
                 LogEvent(() => watchedFiles.GetDeletedFiles(newFiles), Alphabet.DELETE);
 
-                files = newFiles;
+                _files = newFiles;
             }
         }
 
@@ -52,13 +54,17 @@ namespace Domain.Services
         {
             algorithmus()
                 .Select(f => new FileEvent(f.DateiName, alphabet))
-                .ForEach(evt => Trace.TraceInformation(evt.DateiName + " " + evt.Event));
+                .ForEach(evt =>
+                {
+                    Trace.TraceInformation(evt.DateiName + " " + evt.Event);
+                    _fileEvents.Enqueue(evt);
+                });
         }
 
         private IEnumerable<WatchedFile> GetDirectoryFiles()
         {
-            return dateiLeser.ReadFiles(verzeichnis)
-                .Select(f => new WatchedFile(Path.GetFileName(f), verzeichnis, dateiLeser.GetFileTime(f), Dateizustande.CREATED))
+            return _dateiLeser.ReadFiles(_verzeichnis)
+                .Select(f => new WatchedFile(Path.GetFileName(f), _verzeichnis, _dateiLeser.GetFileTime(f), Dateizustande.CREATED))
                 .ToList();
         }
     }

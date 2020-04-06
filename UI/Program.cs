@@ -1,5 +1,7 @@
-﻿using Domain.Services;
+﻿using Domain.Models;
+using Domain.Services;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
@@ -9,9 +11,21 @@ namespace UI
     {
         private static void Main(string[] args)
         {
+            var queue = new Queue<FileEvent>();
+
             AddLogger();
-            var watcher = new DirectoryWatcher(Environment.CurrentDirectory);
-            watcher.Watch();
+            var directoryWatcher = new DirectoryWatcher(queue, Environment.CurrentDirectory);
+            directoryWatcher.Watch();
+
+            var watchedDirectory = new WatchedDirectory();
+
+            while (true)
+            {
+                if (queue.TryDequeue(out var fileEvent))
+                {
+                    watchedDirectory.Update(fileEvent);
+                }
+            }
         }
 
         private static void AddLogger()
